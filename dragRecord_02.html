@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Untitled Document</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="js/elementextend.js"></script>
+    <script src="js/command.js"></script>
+    <script src="js/dragfunction.js"></script>
+</head>
+
+<body>
+    <div class="boxframe02">
+        <div class="frame">
+            <div class="subframe">
+                <div class="box" id="box01">A</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box02">B</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box03">C</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box04">D</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box05">E</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box06">F</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box01">A</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box02">B</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box03">C</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box04">D</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box05">E</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box06">F</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box01">A</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box02">B</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box03">C</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box04">D</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box05">E</div>
+            </div>
+            <div class="subframe">
+                <div class="box" id="box06">F</div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .boxframe02 {
+            position: relative;
+            display: block;
+            width: 600px;
+            height: 400px;
+            /*background-color: #585858;*/
+            margin: 0 auto;
+            /*background-color: black;*/
+            perspective-origin: center center;
+            -moz-perspective-origin: center center;
+            -webkit-perspective-origin: center center;
+            perspective: 500px;
+            -moz-perspective: 500px;
+            -webkit-perspective: 500px;
+        }
+
+        .frame {
+            position: absolute;
+            display: block;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            -moz-transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+        }
+
+        .subframe {
+            position: absolute;
+            display: block;
+            width: 200px;
+            height: 200px;              
+            top: 50%;
+        }
+
+        .subframe .box {
+            position: absolute;
+            display: block;
+            width: 100%;
+            height: 100%;            
+        }
+        /*.subframe.active {
+            display: block;
+        }*/
+
+        #box01 {
+            background-color: brown;
+        }
+
+        #box02 {
+            background-color: #46a535;
+        }
+
+        #box03 {
+            background-color: #1094f5;
+        }
+
+        #box04 {
+            background-color: #c910f5;
+        }
+
+        #box05 {
+            background-color: #e89efa;
+        }
+
+        #box06 {
+            background-color: #1083f5;            
+        }
+
+    </style>
+    <script>
+        $(function() {
+            $('.boxframe02').dragFunction({
+                init:function() {
+                    aaa(0);
+                    return {
+                        t: 0,
+                        _t: 0
+                    };
+                },
+                movementNumber: 30,
+                begin: function(e, x, y, dis) {
+                    $(this.data).stop(true);
+                    this.data._t = this.data.t;
+                },
+                end: function(e, m) {},
+                move: function(e, x, y, d, m, dis) {
+                    this.data.t = this.data._t + 10 * d.x / $('.boxframe02').width();
+                    //this.data.t = numberCrop(this.data.t, 0, $('.subframe').length - 1);
+                    this.data.t = (this.data.t + $('.subframe').length) % $('.subframe').length;
+                    console.log(this.data.t)
+                    aaa(this.data.t);
+                },
+                movement: function(m, ease, c) {
+                    this.data.t = this.data.t + 10 * m.x * ease / $('.boxframe02').width();
+                    //this.data.t = numberCrop(this.data.t, 0, $('.subframe').length - 1);
+                    this.data.t = (this.data.t + $('.subframe').length) % $('.subframe').length;
+                    aaa(this.data.t);
+                },
+                movementend: function() {
+                    var _this = this;
+                    $(this.data).stop(true).animate({
+                        t: Math.round(_this.data.t)
+                    }, {
+                        duration: 500,
+                        step: function(now, fx) {
+                            aaa(_this.data.t);
+                        }
+                    });
+                }
+            });
+
+            function aaa(t) {
+                var subframe = $('.subframe');
+                subframe.each(function(index, element) {
+                    //var tt = numberCrop((t - index) * (100/$('.boxframe02').width()), -1, 1);
+                    var tt = (((t - index) * (2 / Math.min(subframe.length, 12)) + 3) % 2) - 1;
+                    var opacityRate = 1 - EasingFunctions.easeInQuad(Math.abs(tt));
+                    var leftRate = (tt > 0 ? 1 : -1) * EasingFunctions.easeOutCubic(Math.abs(tt));
+                    var transformRotateYRate = (tt > 0 ? 1 : -1) * EasingFunctions.easeOutQuint(Math.abs(tt));
+                    var transformTranslateZRate = (tt > 0 ? 1 : -1) * EasingFunctions.easeOutQuint(Math.abs(tt));
+                    var blurRate = EasingFunctions.easeInQuad(Math.abs(tt));
+                    var scaleRate =  1;
+                    //transformRate = (transformRate > 0 ? 1 : -1) * EasingFunctions.easeOutQuint(Math.abs(transformRate));
+                    $(element).css({
+                        left: $('.boxframe02').width() * (0.5 + leftRate * 0.5),
+                        transform: /*'perspective(500px) '+*/'translate(-50%,-50%) ' + 'translateZ(' + ((-Math.abs(transformTranslateZRate)) * 200) + 'px) '+ 'rotateY(' + ((-transformRotateYRate) * 90) + 'deg) ' + 'scale(' + scaleRate + ') ',
+                        opacity: opacityRate,
+                        
+                    });
+                    /*$(element).find('.box').css({
+                        filter: 'blur('+(10*blurRate)+'px)'
+                    });*/
+                    if (opacityRate <= 0) {
+                        $(element).css({
+                            display: 'none'
+                        });
+                    } else {
+                        $(element).css({
+                            display: ''
+                        });
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+
+</html>

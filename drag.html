@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Untitled Document</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="js/elementextend.js"></script>
+    <script src="js/command.js"></script>
+    <script src="js/dragfunction.js"></script>
+</head>
+
+<body>
+    <div class="boxframe01">
+        <div id="box01">
+            <div id="box02">
+                <div id="box03"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .boxframe01 {
+            position: relative;
+            display: block;
+            width: 800px;
+            height: 200px;
+            background-color: #aaaaaa;
+            overflow: hidden;
+        }
+
+        #box01 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 200px;
+            background-color: aqua;
+        }
+
+        #box02 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 100px;
+            height: 100px;
+            background-color: #ff1400;
+        }
+
+        #box03 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            background-color: #0014ff;
+        }
+
+    </style>
+    <script>
+        $.fn.extend({
+            dragmove: function() {
+                return this.dragFunction({
+                    init: function() {
+                        return {
+                            x: 0,
+                            y: 0
+                        };
+                    },
+                    begin: function(e, x, y, dis) {
+                        this.data.x = parseFloat($(this.el).css('left'));
+                        this.data.y = parseFloat($(this.el).css('top'));
+                    },
+                    end: function(e, m) {
+                        this.data.x = parseFloat($(this.el).css('left'));
+                        this.data.y = parseFloat($(this.el).css('top'));
+                    },
+                    move: function(e, x, y, d, m, dis) {
+                        $(this.el).css({
+                            left: this.data.x + d.x,
+                            top: this.data.y + d.y
+                        });
+                    },
+                    movement: function(m, ease) {
+                        this.data.x += m.x * ease;
+                        this.data.y += m.y * ease;
+                        $(this.el).css({
+                            left: this.data.x,
+                            top: this.data.y
+                        });
+                    }
+                });
+            }
+        });
+        $(function() {
+            $('#box01').dragmove();
+            $('#box02').dragmove();
+            $('#box03').dragmove();
+        });
+
+    </script>
+</body>
+
+</html>

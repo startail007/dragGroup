@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Untitled Document</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="js/elementextend.js"></script>
+    <script src="js/command.js"></script>
+    <script src="js/dragfunction.js"></script>
+</head>
+
+<body>
+    <div class="boxframe01">
+        <div id="box01" class="box">
+            <div class="line"></div>
+        </div>
+        <div id="text01">
+        </div>
+    </div>
+    <style>
+        .boxframe01 {
+            position: relative;
+            display: block;
+            /*width: 800px;*/
+            /*height: 200px;*/
+            background-color: #aaaaaa;
+            overflow: hidden;
+        }
+
+        .box {
+            position: relative;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 200px;
+            background-color: aqua;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .line {
+            position: absolute;
+            display: block;
+            left: 50%;
+            top: 50%;
+            width: 50%;
+            height: 2px;
+            background-color: #000000;
+            transform: translate(0%, -50%)
+        }
+
+        #text01 {
+            position: relative;
+            display: block;
+        }
+
+    </style>
+    <script>
+        var Vector = function(x, y) {
+            this.x = x;
+            this.y = y;
+            this.length = function() {
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            }
+            this.scale = function(n) {
+                return new createjs.vector(this.x * n, this.y * n);
+            }
+            this.add = function(v) {
+                return new createjs.vector(this.x + v.x, this.y + v.y);
+            }
+            this.sub = function(v) {
+                return new createjs.vector(this.x - v.x, this.y - v.y);
+            }
+            this.swap = function() {
+                return new createjs.vector(-this.y, this.x);
+            }
+            this.projection = function(v) {
+                var temp = this.dot(v) / v.length();
+                return new createjs.vector(v.x * temp, v.y * temp);
+            }
+            this.normalize = function() {
+                var r = this.length();
+                return new createjs.vector(this.x / r, this.y / r);
+            }
+            this.rotate = function(pAngle) {
+                var cos0 = Math.cos(pAngle);
+                var sin0 = Math.sin(pAngle);
+                return new createjs.vector(this.x * cos0 - this.y * sin0, this.y * cos0 + this.x * sin0);
+            }
+        }
+
+        Object.defineProperty(Vector, 'dot', {
+            value: function(a, b) {
+                return a.x * b.x + a.y * b.y;
+            }
+        });
+        Object.defineProperty(Vector, 'cross', {
+            value: function(a, b) {
+                return a.x * b.y - a.y * b.x;
+            }
+        });
+        Object.defineProperty(Vector, 'getAngle', {
+            value: function(a, b) {
+                return (Vector.cross(a, b) >= 0 ? 1 : -1) * 180 * Math.acos(Vector.dot(a, b) / a.length() / b.length()) / Math.PI;
+            }
+        });
+
+        
+        $.fn.extend({
+            dragrotation: function(cx, cy, min, max, update) {
+                return this.dragFunction({
+                    init: function() {
+                        $(this.el).css({
+                            transformOrigin: cx + 'px' + ' ' + cy + 'px'
+                        });
+                        return {
+                            angle: 0,
+                            _angle: 0,
+                            angleOffset: 0
+                        }
+                    },
+                    movementNumber: 15,
+                    begin: function(e, x, y, dis) {
+                        this.data._angle = this.data.angle;
+                        this.data.angleOffset = 0;
+                    },
+                    end: function(e, m) {},
+                    movebegin: function(e) {},
+                    move: function(e, x, y, d, m, dis) {
+                        var v0 = new Vector(x - cx - m.x, y - cy - m.y);
+                        var v1 = new Vector(x - cx, y - cy);
+                        this.data.angleOffset += Vector.getAngle(v0, v1);
+                        this.data.angle = numberCrop(this.data._angle + this.data.angleOffset, min, max);
+                        $(this.el).css({
+                            transform: 'rotate(' + this.data.angle + 'deg)'
+                        });
+                        if (update) {
+                            update(this.data.angle);
+                        }
+                    },
+                    movement: function(m, ease, c) {
+                        var v0 = new Vector(c.x - cx - m.x * ease, c.y - cy - m.y * ease);
+                        var v1 = new Vector(c.x - cx, c.y - cy);
+                        this.data.angle = numberCrop(this.data.angle + Vector.getAngle(v0, v1), min, max);
+                        $(this.el).css({
+                            transform: 'rotate(' + this.data.angle + 'deg)'
+                        });
+                        if (update) {
+                            update(this.data.angle);
+                        }
+                    }
+                });
+            }
+        });
+        $(function() {
+            $('#text01').html(0);
+            $('#box01').dragrotation($('#box01').width() * 0.5, $('#box01').width() * 0.5, 0, 720, function(angle) {
+                console.log(angle);
+                $('#text01').html(angle);
+            });
+        });
+
+    </script>
+</body>
+
+</html>

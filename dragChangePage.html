@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Untitled Document</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="js/elementextend.js"></script>
+    <script src="js/command.js"></script>
+    <script src="js/dragfunction.js"></script>
+</head>
+
+<body>
+    <div class="boxframe02">
+        <div class="frame">
+            <div class="subframe" id="subframe01">
+                A
+            </div>
+            <div class="subframe" id="subframe02">
+                B
+            </div>
+            <div class="subframe" id="subframe03">
+                C
+            </div>
+            <div class="subframe" id="subframe04">
+                D
+            </div>
+        </div>
+        <div class="animate">
+        </div>
+    </div>
+    <style>
+        .boxframe01 {
+            position: relative;
+            display: block;
+            width: 800px;
+            height: 200px;
+            background-color: #aaaaaa;
+            overflow: hidden;
+        }
+
+        .boxframe02 {
+            position: relative;
+            display: block;
+            width: 300px;
+            height: 100px;
+            /*background-color: #585858;*/
+        }
+
+        .frame {
+            position: absolute;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .subframe {
+            position: absolute;
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .subframe.active {
+            display: block;
+        }
+
+        #subframe01 {
+            background-color: brown;
+        }
+
+        #subframe02 {
+            background-color: #46a535;
+        }
+
+        #subframe03 {
+            background-color: #1094f5;
+        }
+
+        #subframe04 {
+            background-color: #c910f5;
+        }
+
+        .animate {
+            position: absolute;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .box {
+            position: absolute;
+            display: block;
+            perspective: 250px;
+            perspective-origin: center center;
+        }
+
+        .boxItem {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #898989;
+            /*border: 1px solid #989898;*/
+            box-sizing: border-box;
+            backface-visibility: hidden;
+            overflow: hidden;
+            /*transform-origin: 0% 50%;*/
+        }
+
+        #box01 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 200px;
+            background-color: aqua;
+        }
+
+        #box02 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 100px;
+            height: 100px;
+            background-color: #ff1400;
+        }
+
+        #box03 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            background-color: #0014ff;
+        }
+
+    </style>
+    <script>
+        $(function() {
+            var boxs;
+            var t = {
+                value: 0
+            };
+            var mainIndex = 0;
+            var _mainIndex = 0;
+            $('.boxframe02 .subframe').eq(mainIndex).addClass('active');
+            $('.boxframe02').dragFunction({
+                begin: function(e, x, y, dis) {
+                    $(t).stop(true);
+                    if (boxs == undefined) {
+                        boxs = createBoxs();
+                        setBoxs(boxs, t.value);
+                    }
+                    _mainIndex = mainIndex;
+                },
+                end: function(e, m) {
+                    var tt = Math.abs(m.x) > 5 ? (m.x > 0 ? 1 : -1) : Math.round(t.value);
+                    $(t).stop(true).animate({
+                        value: tt
+                    }, {
+                        duration: 500+5000 * Math.abs(tt - t.value),
+                        step: function(now, fx) {
+                            t.value = parseFloat(t.value.toFixed(3));
+                            aaa();
+                            setBoxs(boxs, t.value);
+                        }
+                    }).queue(function() {
+                        mainIndex = _mainIndex;
+                        boxs.remove();
+                        boxs = undefined;
+                        t.value = 0;
+                    });
+                    return false;
+                },
+                move: function(e, x, y, d, m, dis) {
+                    t.value = t.value + (m.x / $('.boxframe02').width()/5);
+                    aaa();
+                    setBoxs(boxs, t.value);
+                }
+            });
+
+            function aaa() {
+                var len = $('.boxframe02 .subframe').length;
+                if (mainIndex == _mainIndex) {
+                    if (t.value > 0.5) {
+                        _mainIndex = mainIndex - 1;
+                        _mainIndex = (_mainIndex + len) % len;
+                        $('.boxframe02 .subframe').removeClass('active');
+                        $('.boxframe02 .subframe').eq(_mainIndex).addClass('active');
+                    } else if (t.value < -0.5) {
+                        _mainIndex = mainIndex + 1;
+                        _mainIndex = (_mainIndex + len) % len;
+                        $('.boxframe02 .subframe').removeClass('active');
+                        $('.boxframe02 .subframe').eq(_mainIndex).addClass('active');
+                    }
+                } else {
+                    if (t.value <= 0.5 && t.value >= -0.5) {
+                        _mainIndex = mainIndex;
+                        _mainIndex = (_mainIndex + len) % len;
+                        $('.boxframe02 .subframe').removeClass('active');
+                        $('.boxframe02 .subframe').eq(_mainIndex).addClass('active');
+                    }
+                }
+            }
+
+            function createBoxs() {
+                var boxs = $([]);
+                var nx = 3;
+                var ny = 1;
+                for (var i = 0; i < nx; i++) {
+                    for (var j = 0; j < ny; j++) {
+                        var box = $('<div/>', {
+                            class: 'box',
+                            html: '<div class="boxItem"></div>'
+                        });
+                        $('.boxframe02 .animate').append(box);
+                        /*var temp = $('.boxframe02 .subframe').eq(mainIndex).clone();
+                        temp.addClass('active');
+                        box.find('.boxItem').append(temp);*/
+                        boxs = boxs.add(box);
+                    }
+                }
+
+                for (var i = 0; i < boxs.length; i++) {
+                    /*boxs.eq(i).css({
+                        left: 100 * i / boxs.length + '%',
+                        top: 0 + '%',
+                        width: 100 / boxs.length + '%',
+                        height: 100 + '%'
+                    });*/
+                    var x = i % nx;
+                    var y = parseInt(i / nx);
+                    boxs.eq(i).css({
+                        left: 100 * x / nx + '%',
+                        top: 100 * y / ny + '%',
+                        width: 100 / nx + '%',
+                        height: 100 / ny + '%'
+                    });
+                    boxs.eq(i).find('.subframe').css({
+                        left: -100 * x + '%',
+                        top: -100 * y + '%',
+                        width: nx * 100 + '%',
+                        height: ny * 100 + '%'
+                    });
+                }
+                return boxs;
+            }
+
+            function setBoxs(boxs, t) {
+                if (t < 0) {
+                    t = 1 + t;
+                }
+                setBoxsLR(boxs, t > 0.5 ? 2 - t * 2 : t * 2, t > 0.5);
+            }
+
+            function setBoxsLR(boxs, t, bool) {
+                var index = parseInt(t * boxs.length);
+                if (index < boxs.length) {
+                    boxs.each(function(index0, element0) {
+                        var iii;
+                        if (bool) {
+                            iii = boxs.length - index0 - 1;
+                        } else {
+                            iii = index0;
+                        }
+                        var rate = t * boxs.length - iii;                        
+                        var a = parseInt(Math.max(0, Math.min(255, 255*rate)));
+                        rate = Math.max(0, Math.min(1, rate));
+                        var obj = {
+                            display: rate > 0 ? '' : 'none',
+                            backgroundColor:'#'+(a + (a << 8) + (a << 16)).toString(16),
+                            zIndex:index == index0?1:'',
+                            opacity:rate
+                        };
+                        /*if(index == index0){
+                            console.log(index0)
+                           }*/
+                        var ii = iii % 4;
+                        if (ii == 0) {
+                            obj.transformOrigin = '50% 0%';
+                            obj.transform = 'rotateX(' + (-90 * (1 - rate)) + 'deg)';
+                        } else if (ii == 1) {
+                            obj.transformOrigin = '100% 50%';
+                            obj.transform = 'rotateY(' + (-90 * (1 - rate)) + 'deg)';
+                        } else if (ii == 2) {
+                            obj.transformOrigin = '50% 100%';
+                            obj.transform = 'rotateX(' + (90 * (1 - rate)) + 'deg)';
+                        } else if (ii == 3) {
+                            obj.transformOrigin = '0% 50%';
+                            obj.transform = 'rotateY(' + (90 * (1 - rate)) + 'deg)';
+                        }
+                        /*if (bool) {
+                            obj.transformOrigin = '100% 50%';
+                            obj.transform = 'rotateY(' + (90 * (1 - rate)) + 'deg)';
+                        } else {
+                            obj.transformOrigin = '0% 50%';
+                            obj.transform = 'rotateY(' + (-90 * (1 - rate)) + 'deg)';
+                        }*/
+                        $(element0).find('.boxItem').css(obj);
+                    });
+                } else {
+                    boxs.find('.boxItem').css({
+                        display: '',
+                        transform: ''
+                    });
+                }
+            }
+        });
+
+    </script>
+</body>
+
+</html>

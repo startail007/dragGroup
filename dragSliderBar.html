@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Untitled Document</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="js/elementextend.js"></script>
+    <script src="js/command.js"></script>
+    <script src="js/dragfunction.js"></script>
+</head>
+
+<body>
+    <div class="boxframe01">
+        <div id="box01">
+        </div>
+    </div>
+    <style>
+        .boxframe01 {
+            position: relative;
+            display: block;
+            width: 800px;
+            height: 20px;
+            background-color: #aaaaaa;
+            overflow: hidden;
+        }
+
+        #box01 {
+            position: absolute;
+            display: block;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background-color: aqua;
+        }
+
+    </style>
+    <script>
+        $.fn.extend({
+            dragsliderbar: function(rangeRect) {
+                return this.dragFunction({
+                    init: function() {
+                        if (rangeRect) {
+                            var rect = rangeRect(this.el);
+                            var xx = numberCrop(parseFloat($(this.el).css('left')), rect.left, rect.left + rect.width);
+                            var yy = numberCrop(parseFloat($(this.el).css('top')), rect.top, rect.top + rect.height);
+                            $(this.el).css('left', xx);
+                            $(this.el).css('top', yy);
+                        }
+                        return {
+                            x: 0,
+                            y: 0
+                        };
+                    },                    
+                    movementNumber: 15,
+                    begin: function(e, x, y, dis) {
+                        this.data.x = parseFloat($(this.el).css('left'));
+                        this.data.y = parseFloat($(this.el).css('top'));
+                    },
+                    end: function(e, m) {
+                        this.data.x = parseFloat($(this.el).css('left'));
+                        this.data.y = parseFloat($(this.el).css('top'));
+                    },
+                    move: function(e, x, y, d, m, dis) {
+                        var xx = this.data.x + d.x;
+                        var yy = this.data.y + d.y;
+                        if (rangeRect) {
+                            var rect = rangeRect(this.el);
+                            xx = numberCrop(xx, rect.left, rect.left + rect.width);
+                            yy = numberCrop(yy, rect.top, rect.top + rect.height);
+                        }
+                        $(this.el).css({
+                            left: xx,
+                            top: yy
+                        });
+                    },
+                    movement: function(m, ease) {
+                        this.data.x += m.x * ease;
+                        this.data.y += m.y * ease;
+                        if (rangeRect) {
+                            var rect = rangeRect(this.el);
+                            this.data.x = numberCrop(this.data.x, rect.left, rect.left + rect.width);
+                            this.data.y = numberCrop(this.data.y, rect.top, rect.top + rect.height);
+                        }
+                        $(this.el).css({
+                            left: this.data.x,
+                            top: this.data.y
+                        });
+                    }
+                });
+            }
+        });
+        $(function() {
+            $('#box01').dragsliderbar(function(el) {
+                return {
+                    left: 0,
+                    top: 0,
+                    width: $('#box01').parent().width() - $(el).width(),
+                    height: $('#box01').parent().height() - $(el).height()
+                };
+            });
+        });
+
+    </script>
+</body>
+
+</html>
